@@ -71,6 +71,19 @@ export async function getCategories() {
   return data;
 }
 
+export async function getSubcategories() {
+  const { data, error } = await supabase
+    .from('subcategories')
+    .select('*')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error("Error fetching subcategories:", error);
+    return [];
+  }
+  return data;
+}
+
 // Collections Fetching
 export async function getCollections() {
   const { data, error } = await supabase

@@ -9,7 +9,7 @@ import InstagramGallery from "@/components/home/InstagramGallery";
 import ContactCTASection from "@/components/home/ContactCTASection";
 import ShopTheLook from "@/components/home/ShopTheLook";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export default async function Home() {
   const newArrivalsData = await getProducts({ newArrival: true, limit: 4 });

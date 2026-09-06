@@ -1,12 +1,8 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getCategories } from "@/lib/data";
 
 export default async function CategoryRow() {
-  const supabase = await createClient();
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('*')
-    .order('display_order', { ascending: true });
+  const categories = await getCategories();
 
   if (!categories || categories.length === 0) return null;
 
@@ -22,17 +18,17 @@ export default async function CategoryRow() {
         </Link>
       </div>
 
-      <div className="flex justify-between items-center overflow-x-auto pb-8 snap-x hide-scrollbar gap-6 md:gap-4">
+      <div className="flex items-center overflow-x-auto pb-8 snap-x hide-scrollbar gap-4 md:gap-4 md:justify-between">
         {categories.map((cat) => (
-          <Link key={cat.id} href={`/shop?category=${cat.slug}`} className="flex flex-col items-center gap-4 group snap-center shrink-0 w-32 md:w-auto md:flex-1">
-            <div className="w-28 h-28 md:w-36 md:h-36 lg:w-44 lg:h-44 rounded-full bg-[#f0eae1] border border-border/50 group-hover:border-primary transition-colors flex items-center justify-center overflow-hidden">
+          <Link key={cat.id} href={`/shop/${cat.slug}`} className="flex flex-col items-center gap-3 md:gap-4 group snap-center shrink-0 w-24 sm:w-28 md:w-auto md:flex-1">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 lg:w-44 lg:h-44 rounded-full bg-[#f0eae1] border border-border/50 group-hover:border-primary transition-colors flex items-center justify-center overflow-hidden">
                {cat.image_url ? (
                  <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover" />
                ) : (
                  <span className="text-[10px] text-foreground/40 font-serif">Img</span>
                )}
             </div>
-            <span className="font-serif text-lg text-heading group-hover:text-primary transition-colors">{cat.name}</span>
+            <span className="font-serif text-sm md:text-lg text-heading group-hover:text-primary transition-colors text-center">{cat.name}</span>
           </Link>
         ))}
       </div>

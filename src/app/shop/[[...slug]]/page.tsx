@@ -1,6 +1,8 @@
-import { getProducts, getCategories } from "@/lib/data";
+import { getProducts, getCategories, getSubcategories } from "@/lib/data";
 import PageHeader from "@/components/ui/PageHeader";
 import ShopClientSideFilter from "../ShopClientSideFilter";
+
+export const revalidate = 60;
 
 export default async function ShopPage({ params }: { params: Promise<{ slug?: string[] }> }) {
   const resolvedParams = await params;
@@ -29,9 +31,7 @@ export default async function ShopPage({ params }: { params: Promise<{ slug?: st
   });
 
   // Fetch subcategories
-  const { createClient } = require('@/lib/supabase/server');
-  const supabase = await createClient();
-  const { data: subcategoriesData } = await supabase.from('subcategories').select('*');
+  const subcategoriesData = await getSubcategories();
 
   // Build full categories structure
   const categoriesList = categoriesData.map((c: any) => ({

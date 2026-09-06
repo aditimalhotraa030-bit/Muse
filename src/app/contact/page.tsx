@@ -30,16 +30,7 @@ export default function ContactPage() {
             <div>
               <h3 className="font-serif text-xl text-heading mb-2">Visit our studio</h3>
               <p className="text-sm text-foreground/80 leading-relaxed">
-                Jaipur, Rajasthan, India<br />
-                By appointment only.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="font-serif text-xl text-heading mb-2">Email us</h3>
-              <p className="text-sm text-foreground/80 leading-relaxed">
-                hello@musebykashish.com<br />
-                We typically respond within 24 hours.
+                Bareilly, Uttar Pradesh, India
               </p>
             </div>
           </div>
