@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
-import { X, ShoppingBag, Plus, Minus, Trash2 } from "lucide-react";
+import { X, ShoppingBag, Plus, Minus, Trash2, MessageCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 
 interface CartDrawerProps {
@@ -60,7 +60,7 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
   if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[99999] flex justify-end h-[100dvh] max-h-[100dvh] overflow-hidden">
+    <div className="fixed inset-0 z-[99999] flex justify-end overflow-hidden">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -70,7 +70,7 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
 
       {/* Drawer */}
       <div 
-        className="relative w-full sm:w-[420px] max-w-full h-[100dvh] max-h-[100dvh] bg-background shadow-2xl z-10 flex flex-col overflow-hidden animate-in slide-in-from-right duration-300"
+        className="relative w-full sm:w-[420px] max-w-full h-full max-h-full bg-background shadow-2xl z-10 flex flex-col overflow-hidden animate-in slide-in-from-right duration-300"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border bg-surface shrink-0">
@@ -144,7 +144,7 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      {item.variant && (
+                      {item.variant && item.variant.type !== "Color" && (
                         <p className="text-[11px] text-foreground/70 mt-0.5">{item.variant.type}: {item.variant.value}</p>
                       )}
                       <p className="text-sm font-semibold text-foreground mt-1.5">₹{item.price.toLocaleString('en-IN')}</p>
@@ -177,7 +177,7 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
 
         {/* Footer */}
         {cartStore.items.length > 0 && (
-          <div className="p-4 sm:p-6 border-t border-border bg-surface shrink-0 space-y-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          <div className="p-4 sm:p-6 border-t border-border bg-surface shrink-0 space-y-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] mt-auto">
             <div className="flex justify-between items-center">
               <span className="font-serif text-base text-heading">Subtotal</span>
               <span className="font-serif text-xl font-bold text-heading">₹{cartStore.getCartTotal().toLocaleString('en-IN')}</span>
@@ -185,8 +185,9 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
             <p className="text-[11px] text-foreground/60 text-center">Shipping & taxes calculated at checkout</p>
             <button 
               onClick={handleCheckout}
-              className="w-full py-3.5 bg-[#25D366] text-white text-xs font-bold tracking-wider rounded-full hover:bg-[#128C7E] transition-colors uppercase flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-3.5 bg-[#25D366] text-white text-xs font-bold tracking-wider rounded-full hover:bg-[#128C7E] active:scale-[0.99] transition-all uppercase flex items-center justify-center gap-2 shadow-sm font-semibold cursor-pointer"
             >
+              <MessageCircle className="w-4 h-4 fill-current" />
               Order on WhatsApp
             </button>
           </div>
