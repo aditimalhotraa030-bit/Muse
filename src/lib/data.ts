@@ -65,7 +65,20 @@ export async function getCategories() {
     console.error("Error fetching categories:", error);
     return [];
   }
-  return data;
+
+  const categoryOrderMap: Record<string, number> = {
+    'necklace': 1,
+    'earrings': 2,
+    'bangles': 3,
+    'genz-jewelry': 4,
+    'rings': 5,
+  };
+
+  return [...data].sort((a, b) => {
+    const orderA = categoryOrderMap[a.slug?.toLowerCase()] ?? (a.display_order ?? 99);
+    const orderB = categoryOrderMap[b.slug?.toLowerCase()] ?? (b.display_order ?? 99);
+    return orderA - orderB;
+  });
 }
 
 // Subcategories Fetching

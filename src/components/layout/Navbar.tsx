@@ -30,7 +30,20 @@ export default function Navbar() {
         .order('display_order', { ascending: true });
         
       if (data) {
+        const categoryOrderMap: Record<string, number> = {
+          'necklace': 1,
+          'earrings': 2,
+          'bangles': 3,
+          'genz-jewelry': 4,
+          'rings': 5,
+        };
+        data.sort((a, b) => {
+          const orderA = categoryOrderMap[a.slug?.toLowerCase()] ?? (a.display_order ?? 99);
+          const orderB = categoryOrderMap[b.slug?.toLowerCase()] ?? (b.display_order ?? 99);
+          return orderA - orderB;
+        });
         data.forEach(cat => {
+          if (cat.name === "GenZ Jewelry") cat.name = "GenZ Jewellry";
           if (cat.subcategories) {
             cat.subcategories.sort((a: any, b: any) => a.display_order - b.display_order);
           }

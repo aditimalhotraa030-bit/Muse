@@ -29,7 +29,9 @@ export default async function CategoryRow() {
                  <span className="text-[10px] text-foreground/40 font-serif">Img</span>
                )}
             </div>
-            <span className="font-serif text-sm md:text-lg text-heading group-hover:text-primary transition-colors text-center">{cat.name}</span>
+            <span className="font-serif text-sm md:text-lg text-heading group-hover:text-primary transition-colors text-center">
+              {cat.name === "GenZ Jewelry" ? "GenZ Jewellry" : cat.name}
+            </span>
           </Link>
         ))}
       </div>

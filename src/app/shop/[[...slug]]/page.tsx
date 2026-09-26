@@ -33,9 +33,19 @@ export default async function ShopPage({ params }: { params: Promise<{ slug?: st
   // Fetch subcategories
   const subcategoriesData = await getSubcategories();
 
+  // Explicit Category Order: All, Necklace, Earrings, Bangles, GenZ Jewellry, Rings
+  const categoryOrderMap: Record<string, number> = {
+    'all': 0,
+    'necklace': 1,
+    'earrings': 2,
+    'bangles': 3,
+    'genz-jewelry': 4,
+    'rings': 5,
+  };
+
   // Build full categories structure
   const categoriesList = categoriesData.map((c: any) => ({
-    name: c.name,
+    name: c.name === "GenZ Jewelry" ? "GenZ Jewellry" : c.name,
     slug: c.slug,
     subcategories: subcategoriesData?.filter((sub: any) => sub.category_id === c.id).map((sub: any) => ({
       name: sub.name,
@@ -43,7 +53,11 @@ export default async function ShopPage({ params }: { params: Promise<{ slug?: st
     })) || []
   }));
 
-  const categories = [{ name: "All", slug: "all", subcategories: [] }, ...categoriesList];
+  const categories = [{ name: "All", slug: "all", subcategories: [] }, ...categoriesList].sort((a, b) => {
+    const orderA = categoryOrderMap[a.slug.toLowerCase()] ?? 99;
+    const orderB = categoryOrderMap[b.slug.toLowerCase()] ?? 99;
+    return orderA - orderB;
+  });
 
   return (
     <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">

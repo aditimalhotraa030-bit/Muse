@@ -95,7 +95,8 @@ export default function ProductDetailClient({ product }: { product: any }) {
   const handleWhatsAppOrder = () => {
     handleAddToCart();
     const variantNote = selectedVariant ? ` (${selectedVariant})` : '';
-    const message = `Hello, I'd like to order:\n${quantity}x ${product.name}${variantNote}\nPrice: ₹${product.price}\nLink: https://musebykashish.com/product/${product.slug}`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.musebykashish.in';
+    const message = `Hello, I'd like to order:\n${quantity}x ${product.name}${variantNote}\nPrice: ₹${product.price}\nLink: ${origin}/product/${product.slug}`;
     window.open(`https://wa.me/919897110086?text=${encodeURIComponent(message)}`, '_blank');
   };
 

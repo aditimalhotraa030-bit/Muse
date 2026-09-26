@@ -37,6 +37,7 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
 
   // Handle WhatsApp Checkout
   const handleCheckout = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.musebykashish.in';
     let message = "Hello muse by Kashish,\n\nI would like to place an order.\n\nProducts:\n";
     
     cartStore.items.forEach((item, index) => {
@@ -47,7 +48,7 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
       }
       message += `Quantity: ${item.quantity}\n`;
       message += `Price: ₹${item.price.toLocaleString('en-IN')}\n`;
-      message += `Link: https://musebykashish.com/product/${item.slug}\n\n`;
+      message += `Link: ${origin}/product/${item.slug}\n\n`;
     });
 
     message += `Cart Total: ₹${cartStore.getCartTotal().toLocaleString('en-IN')}\n\n`;
