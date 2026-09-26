@@ -18,7 +18,7 @@ export default function NewArrivalsPage() {
           Coming Soon
         </h2>
         <p className="text-foreground/70 max-w-md mx-auto text-base md:text-lg leading-relaxed mb-10">
-          We are currently shooting our newest collection. Check back shortly to see our latest designs!
+          We are currently shooting our newest pieces. Check back shortly to see our latest designs!
         </p>
         <div className="w-16 h-[1px] bg-border mx-auto mb-10"></div>
         <Link href="/shop" className="px-8 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-widest uppercase rounded-full hover:bg-primary-hover transition-colors">

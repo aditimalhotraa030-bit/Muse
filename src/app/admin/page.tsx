@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Package, Layers, Tag, MessageSquare } from "lucide-react";
+import { Package, Layers, Scissors, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState({
     products: 0,
+    suits: 0,
     categories: 0,
-    collections: 0,
     queries: 0
   });
   const [loading, setLoading] = useState(true);
@@ -19,20 +19,20 @@ export default function AdminDashboardPage() {
     async function fetchStats() {
       const [
         { count: productsCount },
+        { count: suitsCount },
         { count: categoriesCount },
-        { count: collectionsCount },
         { count: queriesCount }
       ] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact', head: true }),
+        supabase.from('products').select('*', { count: 'exact', head: true }).eq('product_type', 'jewelry'),
+        supabase.from('products').select('*', { count: 'exact', head: true }).eq('product_type', 'suit'),
         supabase.from('categories').select('*', { count: 'exact', head: true }),
-        supabase.from('collections').select('*', { count: 'exact', head: true }),
         supabase.from('contact_queries').select('*', { count: 'exact', head: true }).eq('status', 'Pending')
       ]);
 
       setStats({
         products: productsCount || 0,
+        suits: suitsCount || 0,
         categories: categoriesCount || 0,
-        collections: collectionsCount || 0,
         queries: queriesCount || 0
       });
       setLoading(false);
@@ -42,9 +42,9 @@ export default function AdminDashboardPage() {
   }, []);
 
   const statCards = [
-    { title: "Total Products", value: stats.products, icon: Package, href: "/admin/products" },
+    { title: "Jewelry Products", value: stats.products, icon: Package, href: "/admin/products" },
+    { title: "Suits", value: stats.suits, icon: Scissors, href: "/admin/suits" },
     { title: "Categories", value: stats.categories, icon: Layers, href: "/admin/categories" },
-    { title: "Collections", value: stats.collections, icon: Tag, href: "/admin/collections" },
     { title: "Pending Queries", value: stats.queries, icon: MessageSquare, href: "/admin/queries" },
   ];
 
@@ -88,9 +88,6 @@ export default function AdminDashboardPage() {
         <div className="flex flex-wrap gap-4">
           <Link href="/admin/products/new" className="px-6 py-3 bg-primary text-primary-foreground text-xs font-bold tracking-wider rounded-full hover:bg-primary-hover transition-colors uppercase">
             Add New Product
-          </Link>
-          <Link href="/admin/announcements" className="px-6 py-3 bg-transparent border border-border text-heading text-xs font-bold tracking-wider rounded-full hover:border-primary hover:text-primary transition-colors uppercase">
-            Update Announcement
           </Link>
         </div>
       </div>

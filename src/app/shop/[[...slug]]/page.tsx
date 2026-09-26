@@ -23,7 +23,7 @@ export default async function ShopPage({ params }: { params: Promise<{ slug?: st
       slug: p.slug,
       price: p.discount_price ? Math.round(p.price * (1 - p.discount_price / 100)) : p.price,
       originalPrice: p.discount_price ? p.price : undefined,
-      badge: (p.new_arrival ? "NEW" : p.best_seller ? "BESTSELLER" : undefined) as any,
+      badge: (p.new_arrival ? "NEW" : undefined) as any,
       image: p.cover_image || "",
       categorySlugs: pCats.map((c: any) => c?.slug).filter(Boolean),
       subcategorySlugs: pSubcats.map((s: any) => s?.slug).filter(Boolean),
@@ -49,7 +49,7 @@ export default async function ShopPage({ params }: { params: Promise<{ slug?: st
     <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
       <PageHeader 
         title="Shop All Jewelry" 
-        subtitle="Discover the full muse by Kashish collection."
+        subtitle="Discover handcrafted jewelry designed for every occasion."
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Shop", href: "/shop" }

@@ -11,6 +11,40 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/collections/:path*',
+        destination: '/shop',
+        permanent: true,
+      },
+      {
+        source: '/collections',
+        destination: '/shop',
+        permanent: true,
+      },
+      {
+        source: '/admin/collections',
+        destination: '/admin',
+        permanent: false,
+      },
+      {
+        source: '/search',
+        destination: '/shop',
+        permanent: true,
+      },
+      {
+        source: '/best-sellers',
+        destination: '/shop',
+        permanent: true,
+      },
+      {
+        source: '/admin/announcements',
+        destination: '/admin',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

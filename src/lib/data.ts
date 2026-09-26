@@ -6,15 +6,13 @@ const supabase = createClient();
 export async function getProducts(options?: {
   limit?: number;
   featured?: boolean;
-  bestSeller?: boolean;
   newArrival?: boolean;
   categorySlug?: string;
-  collectionSlug?: string;
   productType?: 'jewelry' | 'suit' | 'all';
 }) {
   let query = supabase
     .from('products')
-    .select('*, product_categories(categories(*)), collections(*), product_subcategories(subcategories(*))')
+    .select('*, product_categories(categories(*)), product_subcategories(subcategories(*))')
     .eq('availability', true)
     .order('display_order', { ascending: true })
     .order('created_at', { ascending: false });
@@ -26,7 +24,6 @@ export async function getProducts(options?: {
   }
 
   if (options?.featured) query = query.eq('featured', true);
-  if (options?.bestSeller) query = query.eq('best_seller', true);
   if (options?.newArrival) query = query.eq('new_arrival', true);
   if (options?.limit) query = query.limit(options.limit);
 
@@ -44,7 +41,7 @@ export async function getProducts(options?: {
 export async function getProductBySlug(slug: string) {
   const { data, error } = await supabase
     .from('products')
-    .select('*, product_categories(categories(*)), collections(*), product_variants(*), product_subcategories(subcategories(*))')
+    .select('*, product_categories(categories(*)), product_variants(*), product_subcategories(subcategories(*))')
     .eq('slug', slug)
     .single();
 
@@ -71,6 +68,7 @@ export async function getCategories() {
   return data;
 }
 
+// Subcategories Fetching
 export async function getSubcategories() {
   const { data, error } = await supabase
     .from('subcategories')
@@ -79,20 +77,6 @@ export async function getSubcategories() {
 
   if (error) {
     console.error("Error fetching subcategories:", error);
-    return [];
-  }
-  return data;
-}
-
-// Collections Fetching
-export async function getCollections() {
-  const { data, error } = await supabase
-    .from('collections')
-    .select('*')
-    .order('display_order', { ascending: true });
-
-  if (error) {
-    console.error("Error fetching collections:", error);
     return [];
   }
   return data;

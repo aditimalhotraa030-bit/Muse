@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import ProductCard from "@/components/ui/ProductCard";
 
@@ -12,6 +13,7 @@ interface ShopClientSideFilterProps {
 
 export default function ShopClientSideFilter({ products, categories, categoryParam, subcategoryParam }: ShopClientSideFilterProps) {
   const router = useRouter();
+  const [sortBy, setSortBy] = useState<string>("featured");
 
   // Get active category object to find subcategories
   const activeCategoryObj = categories.find(c => c.slug === categoryParam);
@@ -26,6 +28,28 @@ export default function ShopClientSideFilter({ products, categories, categoryPar
   if (subcategoryParam) {
     filteredProducts = filteredProducts.filter(p => p.subcategorySlugs?.includes(subcategoryParam));
   }
+
+  // Sort filtered products
+  const sortedProducts = useMemo(() => {
+    const list = [...filteredProducts];
+    switch (sortBy) {
+      case "price-asc":
+        return list.sort((a, b) => a.price - b.price);
+      case "price-desc":
+        return list.sort((a, b) => b.price - a.price);
+      case "newest":
+        return list.sort((a, b) => {
+          if (a.badge === "NEW" && b.badge !== "NEW") return -1;
+          if (b.badge === "NEW" && a.badge !== "NEW") return 1;
+          return 0;
+        });
+      case "name-asc":
+        return list.sort((a, b) => a.name.localeCompare(b.name));
+      case "featured":
+      default:
+        return list;
+    }
+  }, [filteredProducts, sortBy]);
 
   const handleCategoryClick = (slug: string) => {
     if (slug === 'all') {
@@ -97,19 +121,25 @@ export default function ShopClientSideFilter({ products, categories, categoryPar
       )}
 
       <div className="flex justify-between items-center py-4 border-b border-border mb-8">
-        <span className="text-sm text-foreground/70">{filteredProducts.length} products</span>
+        <span className="text-sm text-foreground/70">{sortedProducts.length} products</span>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-foreground/70">Sorted by</span>
-          <select className="bg-transparent border-none text-sm text-heading font-medium outline-none cursor-pointer p-0 pr-4">
-            <option>Featured</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
+          <span className="text-xs sm:text-sm text-foreground/70">Sorted by</span>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)} 
+            className="bg-transparent border-none text-xs sm:text-sm text-heading font-medium outline-none cursor-pointer p-0 pr-4"
+          >
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="newest">New Arrivals</option>
+            <option value="name-asc">Name: A to Z</option>
           </select>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12">
-        {filteredProducts.map((product) => (
+        {sortedProducts.map((product) => (
           <ProductCard 
             key={product.id}
             id={product.id}

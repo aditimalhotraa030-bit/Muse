@@ -2,11 +2,30 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Play } from "lucide-react";
 
+const DEFAULT_VIDEO_FEED = [
+  {
+    video_url: "/videos/reel-0.mp4",
+    post_url: "https://www.instagram.com/reel/DdlfvQXzeCc/?stkn=NTFvZW9nbG02d3Fz"
+  },
+  {
+    video_url: "/videos/reel-1.mp4",
+    post_url: "https://www.instagram.com/reel/DdgimhUTGF3/?stkn=YWZ0bmtma3lldTY2"
+  },
+  {
+    video_url: "/videos/reel-2.mp4",
+    post_url: "https://www.instagram.com/reel/DdoC7SWTzBK/?stkn=MXc0c3RrMXM2ZG5idg=="
+  },
+  {
+    video_url: "/videos/reel-3.mp4",
+    post_url: "https://www.instagram.com/reel/DY4FcgxTpoI/?stkn=MWppc3JqYmwzanVuYQ=="
+  }
+];
+
 export default async function AboutPage() {
   const supabase = await createClient();
   const { data: settingsData } = await supabase.from('storefront_settings').select('*');
   
-  let videoFeed = Array(4).fill({ video_url: "", post_url: "" });
+  let videoFeed = DEFAULT_VIDEO_FEED;
   
   if (settingsData) {
     const feedRow = settingsData.find(row => row.key === 'about_video_grid');

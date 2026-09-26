@@ -102,12 +102,27 @@ export default function StorefrontSettingsPage() {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
+        const MAX_WIDTH = 1600;
+        const MAX_HEIGHT = 1600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          if (width > height) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          } else {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
         const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext("2d");
         if (ctx) {
-          ctx.drawImage(img, 0, 0);
+          ctx.drawImage(img, 0, 0, width, height);
           canvas.toBlob(
             (blob) => {
               if (blob) {
@@ -121,7 +136,7 @@ export default function StorefrontSettingsPage() {
               }
             },
             "image/webp",
-            0.8
+            0.82
           );
         }
       };
@@ -138,16 +153,19 @@ export default function StorefrontSettingsPage() {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        // Crop to square for instagram
+        // Crop to square for instagram with max 800px
+        const MAX_SIZE = 800;
+        const rawSize = Math.min(img.width, img.height);
+        const finalSize = Math.min(rawSize, MAX_SIZE);
+
         const canvas = document.createElement("canvas");
-        const size = Math.min(img.width, img.height);
-        canvas.width = size;
-        canvas.height = size;
+        canvas.width = finalSize;
+        canvas.height = finalSize;
         const ctx = canvas.getContext("2d");
         if (ctx) {
-          const x = (img.width - size) / 2;
-          const y = (img.height - size) / 2;
-          ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
+          const x = (img.width - rawSize) / 2;
+          const y = (img.height - rawSize) / 2;
+          ctx.drawImage(img, x, y, rawSize, rawSize, 0, 0, finalSize, finalSize);
           canvas.toBlob(
             (blob) => {
               if (blob) {
@@ -161,7 +179,7 @@ export default function StorefrontSettingsPage() {
               }
             },
             "image/webp",
-            0.8
+            0.82
           );
         }
       };

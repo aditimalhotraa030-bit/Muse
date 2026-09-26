@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Camera, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import InstagramIcon from "@/components/icons/InstagramIcon";
 
 export default function Footer() {
   return (
@@ -11,11 +12,11 @@ export default function Footer() {
           <div className="space-y-6">
             <Link href="/" className="inline-block">
               <Image 
-                src="/muse-logo.svg" 
+                src="/muse-logo.png" 
                 alt="Muse by Kashish Logo" 
-                width={500} 
-                height={200} 
-                className="w-auto h-24 md:h-32"
+                width={370} 
+                height={337} 
+                className="w-auto h-16 md:h-20 object-contain"
               />
             </Link>
             <p className="text-sm text-foreground/80 leading-relaxed max-w-xs">
@@ -27,9 +28,8 @@ export default function Footer() {
           <div className="space-y-6">
             <h4 className="font-medium text-heading tracking-wide uppercase text-sm">Shop</h4>
             <ul className="space-y-3">
-              <li><Link href="/collections" className="text-sm text-foreground/80 hover:text-primary transition-colors">Collections</Link></li>
+              <li><Link href="/suits" className="text-sm text-foreground/80 hover:text-primary transition-colors">Suits</Link></li>
               <li><Link href="/new-arrivals" className="text-sm text-foreground/80 hover:text-primary transition-colors">New Arrivals</Link></li>
-              <li><Link href="/best-sellers" className="text-sm text-foreground/80 hover:text-primary transition-colors">Best Sellers</Link></li>
               <li><Link href="/shop" className="text-sm text-foreground/80 hover:text-primary transition-colors">All Jewelry</Link></li>
             </ul>
           </div>
@@ -59,8 +59,14 @@ export default function Footer() {
               </li>
             </ul>
             <div className="flex gap-4 pt-2">
-              <a href="#" className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-primary hover:text-primary transition-colors" aria-label="Instagram">
-                <Camera className="w-4 h-4" />
+              <a 
+                href="https://www.instagram.com/musebykashish.co/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-primary hover:text-primary transition-colors" 
+                aria-label="Instagram"
+              >
+                <InstagramIcon className="w-4 h-4" />
               </a>
             </div>
           </div>

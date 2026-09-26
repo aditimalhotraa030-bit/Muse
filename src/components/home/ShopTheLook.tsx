@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Plus, Image as ImageIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
@@ -56,7 +57,13 @@ export default async function ShopTheLook() {
         {/* Master Image */}
         <div className="relative aspect-[3/4] md:aspect-square lg:aspect-[4/5] bg-muted rounded-md overflow-hidden w-full group">
           {campaignImage ? (
-            <img src={campaignImage} alt="Campaign" className="w-full h-full object-cover" />
+            <Image 
+              src={campaignImage} 
+              alt="Campaign" 
+              fill 
+              sizes="(max-width: 1024px) 100vw, 50vw" 
+              className="object-cover" 
+            />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-[#e4dcd3]">
                <span className="font-serif text-lg opacity-50">Campaign Image Placeholder</span>
@@ -103,7 +110,7 @@ export default async function ShopTheLook() {
               <div key={item.id} className="flex gap-6 items-center p-4 border border-border rounded-md hover:border-primary/50 transition-colors group bg-surface">
                 <Link href={`/product/${item.slug}`} className="w-20 h-24 bg-muted rounded-sm shrink-0 overflow-hidden relative flex items-center justify-center">
                   {item.cover_image ? (
-                    <img src={item.cover_image} alt={item.product_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Image src={item.cover_image} alt={item.product_name} fill sizes="80px" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <ImageIcon className="w-6 h-6 text-foreground/30" />
                   )}

@@ -18,7 +18,10 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   _hasHydrated: boolean;
+  isCartDrawerOpen: boolean;
   setHasHydrated: (state: boolean) => void;
+  openCart: () => void;
+  closeCart: () => void;
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -31,7 +34,10 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       _hasHydrated: false,
+      isCartDrawerOpen: false,
       setHasHydrated: (state) => set({ _hasHydrated: state }),
+      openCart: () => set({ isCartDrawerOpen: true }),
+      closeCart: () => set({ isCartDrawerOpen: false }),
       addItem: (item) => {
         const currentItems = get().items;
         const existingItem = currentItems.find((i) => i.id === item.id);
@@ -70,6 +76,7 @@ export const useCartStore = create<CartState>()(
     {
       name: 'muse-cart-storage',
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ items: state.items }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

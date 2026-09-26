@@ -21,7 +21,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     slug: p.slug,
     price: p.discount_price ? Math.round(p.price * (1 - p.discount_price / 100)) : p.price,
     originalPrice: p.discount_price ? p.price : undefined,
-    badge: (p.new_arrival ? "NEW" : p.best_seller ? "BESTSELLER" : undefined) as any,
+    badge: (p.new_arrival ? "NEW" : undefined) as any,
     image: p.cover_image || ""
   })).filter((p: any) => p.id !== product.id).slice(0, 4);
 
@@ -35,13 +35,20 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     rating: 4.8, // Mock for now
     reviews: 120, // Mock for now
     description: product.description || "",
-    variants: [
-      { type: "Color", options: ["Gold", "Rose Gold", "Silver"] } // Ideally mapped from product_variants
-    ],
+    variants: [],
     material: product.material || "Handcrafted brass.",
     category: product.categories?.name || "Uncategorized",
     care: product.care_instructions || "Keep away from moisture.",
-    images: product.gallery_images?.length ? product.gallery_images : [product.cover_image || ""]
+    images: (() => {
+      const list: string[] = [];
+      if (product.cover_image) list.push(product.cover_image);
+      if (Array.isArray(product.gallery_images)) {
+        product.gallery_images.forEach((img: string) => {
+          if (img && !list.includes(img)) list.push(img);
+        });
+      }
+      return list.length > 0 ? list : [""];
+    })()
   };
 
   return (

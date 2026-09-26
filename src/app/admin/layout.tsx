@@ -9,8 +9,6 @@ import {
   LayoutDashboard,
   Package,
   Layers,
-  Tag,
-  Megaphone,
   MessageSquare,
   LogOut,
   Menu,
@@ -21,7 +19,6 @@ import {
   Scissors
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Toaster } from "@/lib/toast";
 
 const navItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -31,8 +28,6 @@ const navItems = [
   { name: "Suits", href: "/admin/suits", icon: Scissors },
   { name: "Categories", href: "/admin/categories", icon: Layers },
   { name: "Subcategories", href: "/admin/subcategories", icon: Target },
-  { name: "Collections", href: "/admin/collections", icon: Tag },
-  { name: "Announcements", href: "/admin/announcements", icon: Megaphone },
   { name: "Contact Queries", href: "/admin/queries", icon: MessageSquare },
 ];
 
@@ -71,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="h-20 flex items-center justify-between px-6 border-b border-border">
           <Link href="/admin" className="font-serif text-2xl font-bold tracking-tight text-heading flex items-center gap-2">
-            <Image src="/muse-logo.svg" priority alt="Logo" width={300} height={100} className="h-12 md:h-16 w-auto scale-125 origin-left" />
+            <Image src="/muse-logo.png" priority alt="Logo" width={370} height={337} className="h-10 md:h-12 w-auto object-contain" />
             <span className="text-sm font-normal">admin</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-foreground/70">
@@ -149,7 +144,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </AnimatePresence>
         </div>
       </main>
-      <Toaster />
     </div>
   );
 }
