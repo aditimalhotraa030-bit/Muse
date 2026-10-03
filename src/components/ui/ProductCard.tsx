@@ -22,6 +22,7 @@ interface ProductCardProps {
 export default function ProductCard({ id, name, price, originalPrice, image, images, badge, slug }: ProductCardProps) {
   const [mounted, setMounted] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
   const cartStore = useCartStore();
   const wishlistStore = useWishlistStore();
 
@@ -33,16 +34,19 @@ export default function ProductCard({ id, name, price, originalPrice, image, ima
     setMounted(true);
   }, []);
 
-  // Auto-slide images if more than 1 image exists
+  // Auto-slide images only when hovered and more than 1 image exists
   useEffect(() => {
-    if (imageList.length <= 1) return;
+    if (!isHovered || imageList.length <= 1) {
+      setCurrentImageIndex(0);
+      return;
+    }
     
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % imageList.length);
-    }, 2800);
+    }, 1400);
 
     return () => clearInterval(interval);
-  }, [imageList.length]);
+  }, [isHovered, imageList.length]);
 
   const isWishlisted = mounted ? wishlistStore.isInWishlist(id) : false;
 
@@ -97,14 +101,21 @@ export default function ProductCard({ id, name, price, originalPrice, image, ima
   };
 
   return (
-    <div className="group relative flex flex-col gap-4">
+    <div 
+      className="group relative flex flex-col gap-4"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setCurrentImageIndex(0);
+      }}
+    >
       <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-muted">
         <Link href={`/product/${slug}`} className="block relative w-full h-full">
           {imageList.length > 0 ? (
             imageList.map((imgUrl, idx) => (
               <div
                 key={idx}
-                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
                   idx === currentImageIndex ? "opacity-100 z-[1]" : "opacity-0 pointer-events-none z-0"
                 }`}
               >
@@ -125,9 +136,9 @@ export default function ProductCard({ id, name, price, originalPrice, image, ima
           )}
         </Link>
 
-        {/* Indicators for multiple images */}
+        {/* Indicators for multiple images - visible on hover */}
         {imageList.length > 1 && (
-          <div className="absolute bottom-2.5 inset-x-0 z-10 flex justify-center items-center gap-1.5 pointer-events-none">
+          <div className="absolute bottom-2.5 inset-x-0 z-10 flex justify-center items-center gap-1.5 pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100">
             {imageList.map((_, dotIdx) => (
               <span
                 key={dotIdx}
