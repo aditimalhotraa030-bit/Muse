@@ -17,7 +17,7 @@ const DEFAULT_INSTAGRAM_FEED = [
     post_url: "https://www.instagram.com/p/DWwLa3rk0r3/?stkn=MW5vb2t6M2EzYnN1dA=="
   },
   {
-    image_url: "/instagram/post-3.webp",
+    image_url: "/instagram/post-3-emerald.webp",
     post_url: "https://www.instagram.com/p/DWlylDEE5yL/?stkn=ZXVmMm5xOW45YzZ4"
   },
   {
