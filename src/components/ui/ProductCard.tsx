@@ -102,14 +102,14 @@ export default function ProductCard({ id, name, price, originalPrice, image, ima
 
   return (
     <div 
-      className="group relative flex flex-col gap-4"
+      className="group relative flex flex-col h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
         setCurrentImageIndex(0);
       }}
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-muted">
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-muted shrink-0">
         <Link href={`/product/${slug}`} className="block relative w-full h-full">
           {imageList.length > 0 ? (
             imageList.map((imgUrl, idx) => (
@@ -169,11 +169,13 @@ export default function ProductCard({ id, name, price, originalPrice, image, ima
         </button>
       </div>
       
-      <div className="flex flex-col items-center text-center gap-1">
-        <Link href={`/product/${slug}`} className="hover:text-primary transition-colors">
-          <h3 className="font-serif text-lg text-heading">{name}</h3>
+      <div className="flex flex-col items-center text-center flex-1 pt-3 pb-2">
+        <Link href={`/product/${slug}`} className="hover:text-primary transition-colors w-full">
+          <h3 className="font-serif text-base sm:text-lg text-heading line-clamp-2 min-h-[2.75rem] sm:min-h-[3.25rem] leading-snug px-1">
+            {name}
+          </h3>
         </Link>
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-sm mt-1.5">
           <span className="font-medium text-foreground">₹{price.toLocaleString('en-IN')}</span>
           {originalPrice && (
             <span className="text-foreground/50 line-through text-xs">₹{originalPrice.toLocaleString('en-IN')}</span>
@@ -183,7 +185,7 @@ export default function ProductCard({ id, name, price, originalPrice, image, ima
       
       <button 
         onClick={handleAddToCart}
-        className="w-full mt-2 py-2.5 rounded-full border border-border text-xs font-medium text-heading hover:border-primary hover:text-primary transition-colors uppercase tracking-wider"
+        className="w-full mt-auto py-2.5 rounded-full border border-border text-xs font-medium text-heading hover:border-primary hover:text-primary transition-colors uppercase tracking-wider"
       >
         Add to Cart
       </button>
