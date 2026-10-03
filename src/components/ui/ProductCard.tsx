@@ -14,20 +14,39 @@ interface ProductCardProps {
   price: number;
   originalPrice?: number;
   image: string;
+  images?: string[];
   badge?: "NEW";
   slug: string;
 }
 
-export default function ProductCard({ id, name, price, originalPrice, image, badge, slug }: ProductCardProps) {
+export default function ProductCard({ id, name, price, originalPrice, image, images, badge, slug }: ProductCardProps) {
   const [mounted, setMounted] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const cartStore = useCartStore();
   const wishlistStore = useWishlistStore();
+
+  const imageList = (images && images.length > 0)
+    ? images.filter(Boolean)
+    : (image ? [image] : []);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Auto-slide images if more than 1 image exists
+  useEffect(() => {
+    if (imageList.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % imageList.length);
+    }, 2800);
+
+    return () => clearInterval(interval);
+  }, [imageList.length]);
+
   const isWishlisted = mounted ? wishlistStore.isInWishlist(id) : false;
+
+  const primaryImage = imageList[0] || image || "";
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,12 +58,12 @@ export default function ProductCard({ id, name, price, originalPrice, image, bad
       slug,
       price,
       quantity: 1,
-      coverImage: image || "",
+      coverImage: primaryImage,
       variant: { type: "Variant", value: "Standard" }
     });
     toast.cart({
       name,
-      image: image || "",
+      image: primaryImage,
       message: "Added to Cart"
     });
   };
@@ -57,7 +76,7 @@ export default function ProductCard({ id, name, price, originalPrice, image, bad
       toast.wishlist({
         name,
         action: "removed",
-        image: image || ""
+        image: primaryImage
       });
     } else {
       wishlistStore.addItem({
@@ -67,12 +86,12 @@ export default function ProductCard({ id, name, price, originalPrice, image, bad
         slug,
         price,
         originalPrice,
-        image: image || ""
+        image: primaryImage
       });
       toast.wishlist({
         name,
         action: "added",
-        image: image || ""
+        image: primaryImage
       });
     }
   };
@@ -81,20 +100,46 @@ export default function ProductCard({ id, name, price, originalPrice, image, bad
     <div className="group relative flex flex-col gap-4">
       <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-muted">
         <Link href={`/product/${slug}`} className="block relative w-full h-full">
-          {image ? (
-            <Image 
-              src={image} 
-              alt={name} 
-              fill 
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" 
-              className="object-cover transition-transform duration-500 group-hover:scale-105" 
-            />
+          {imageList.length > 0 ? (
+            imageList.map((imgUrl, idx) => (
+              <div
+                key={idx}
+                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                  idx === currentImageIndex ? "opacity-100 z-[1]" : "opacity-0 pointer-events-none z-0"
+                }`}
+              >
+                <Image 
+                  src={imgUrl} 
+                  alt={`${name} - view ${idx + 1}`} 
+                  fill 
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" 
+                  className="object-cover transition-transform duration-500 group-hover:scale-105" 
+                  priority={idx === 0}
+                />
+              </div>
+            ))
           ) : (
             <div className="absolute inset-0 bg-muted flex items-center justify-center text-muted-foreground transition-transform duration-500 group-hover:scale-105">
               <span className="text-xs">Image Placeholder</span>
             </div>
           )}
         </Link>
+
+        {/* Indicators for multiple images */}
+        {imageList.length > 1 && (
+          <div className="absolute bottom-2.5 inset-x-0 z-10 flex justify-center items-center gap-1.5 pointer-events-none">
+            {imageList.map((_, dotIdx) => (
+              <span
+                key={dotIdx}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  dotIdx === currentImageIndex 
+                    ? "w-4 bg-white shadow-md" 
+                    : "w-1.5 bg-white/60 drop-shadow-sm"
+                }`}
+              />
+            ))}
+          </div>
+        )}
         
         {badge && (
           <span className="absolute top-2 left-2 z-10 px-2 py-1 bg-secondary text-secondary-foreground text-[10px] font-bold tracking-wider rounded-sm pointer-events-none">

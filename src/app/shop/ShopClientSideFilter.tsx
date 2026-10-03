@@ -148,6 +148,7 @@ export default function ShopClientSideFilter({ products, categories, categoryPar
             price={product.price}
             originalPrice={product.originalPrice}
             image={product.image}
+            images={product.images}
             badge={product.badge}
           />
         ))}

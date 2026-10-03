@@ -65,7 +65,7 @@ export default async function HeroSection() {
       </div>
 
       {/* ========================================================================= */}
-      {/* DESKTOP HERO VIEW (md and up) - KEPT EXACTLY AS IT IS                     */}
+      {/* DESKTOP HERO VIEW (md and up)                                             */}
       {/* ========================================================================= */}
       <div 
         className="hidden md:flex w-full relative overflow-hidden items-center min-h-[580px] lg:min-h-[640px]"
@@ -73,9 +73,25 @@ export default async function HeroSection() {
           background: "radial-gradient(circle at 60% 45%, #dfc5b0 0%, #5f3f33 100%)"
         }}
       >
-        <div className="container mx-auto px-6 md:px-12 relative w-full flex flex-row items-center justify-between min-h-[580px] lg:min-h-[640px]">
+        {/* Right Image - Shifted to Absolute Right */}
+        <div className="absolute right-0 bottom-0 top-0 w-[50%] lg:w-[48%] xl:w-[46%] max-w-[800px] flex items-end justify-end pointer-events-none z-0">
+          <div className="relative w-full h-full flex items-end justify-end">
+            {/* Subtle champagne glow accent */}
+            <div className="absolute inset-x-8 bottom-0 top-1/4 bg-[#f4ccaf]/15 rounded-full blur-3xl pointer-events-none" />
+            <Image 
+              src={heroImage || "/hero-model.png"} 
+              alt="Classic Jewellery Collection" 
+              fill 
+              priority 
+              sizes="(max-width: 1200px) 50vw, 45vw" 
+              className="object-contain object-bottom object-right drop-shadow-[0_20px_45px_rgba(0,0,0,0.5)]" 
+            />
+          </div>
+        </div>
+
+        <div className="container mx-auto px-6 md:px-12 relative w-full flex flex-row items-center justify-between min-h-[580px] lg:min-h-[640px] z-10">
           {/* Left Content */}
-          <div className="w-[52%] lg:w-[50%] flex flex-col justify-center items-start text-left space-y-6 py-20 lg:py-24 z-10">
+          <div className="w-[52%] lg:w-[50%] flex flex-col justify-center items-start text-left space-y-6 py-20 lg:py-24">
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#f4ccaf] font-medium leading-[1.15] drop-shadow-sm">
               Classic Jewellery Collection
             </h1>
@@ -89,22 +105,6 @@ export default async function HeroSection() {
               >
                 Shop All
               </Link>
-            </div>
-          </div>
-
-          {/* Right Image */}
-          <div className="absolute right-2 lg:right-6 xl:right-16 bottom-0 top-0 w-[48%] lg:w-[46%] xl:w-[44%] max-w-[680px] flex items-end justify-end pointer-events-none">
-            <div className="relative w-full h-full flex items-end justify-end">
-              {/* Subtle champagne glow accent */}
-              <div className="absolute inset-x-8 bottom-0 top-1/4 bg-[#f4ccaf]/15 rounded-full blur-3xl pointer-events-none" />
-              <Image 
-                src={heroImage || "/hero-model.png"} 
-                alt="Classic Jewellery Collection" 
-                fill 
-                priority 
-                sizes="(max-width: 1200px) 50vw, 45vw" 
-                className="object-contain object-bottom drop-shadow-[0_20px_45px_rgba(0,0,0,0.5)]" 
-              />
             </div>
           </div>
         </div>

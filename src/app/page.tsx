@@ -20,7 +20,10 @@ export default async function Home() {
     price: p.discount_price ? Math.round(p.price * (1 - p.discount_price / 100)) : p.price,
     originalPrice: p.discount_price ? p.price : undefined,
     badge: (p.new_arrival ? "NEW" : undefined) as any,
-    image: p.cover_image || ""
+    image: p.cover_image || "",
+    images: (Array.isArray(p.gallery_images) && p.gallery_images.length > 0)
+      ? p.gallery_images
+      : (p.cover_image ? [p.cover_image] : [])
   });
 
   const newArrivals = newArrivalsData.map(mapToCard);

@@ -25,6 +25,9 @@ export default async function ShopPage({ params }: { params: Promise<{ slug?: st
       originalPrice: p.discount_price ? p.price : undefined,
       badge: (p.new_arrival ? "NEW" : undefined) as any,
       image: p.cover_image || "",
+      images: (Array.isArray(p.gallery_images) && p.gallery_images.length > 0)
+        ? p.gallery_images
+        : (p.cover_image ? [p.cover_image] : []),
       categorySlugs: pCats.map((c: any) => c?.slug).filter(Boolean),
       subcategorySlugs: pSubcats.map((s: any) => s?.slug).filter(Boolean),
     };

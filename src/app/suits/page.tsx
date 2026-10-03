@@ -14,6 +14,9 @@ export default async function SuitsPage() {
       originalPrice: p.discount_price ? p.price : undefined,
       badge: (p.new_arrival ? "NEW" : undefined) as any,
       image: p.cover_image || "",
+      images: (Array.isArray(p.gallery_images) && p.gallery_images.length > 0)
+        ? p.gallery_images
+        : (p.cover_image ? [p.cover_image] : []),
       categorySlugs: [], // Optionally fetch categories if suits use them
       subcategorySlugs: [],
     };

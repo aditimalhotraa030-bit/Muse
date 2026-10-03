@@ -31,6 +31,7 @@ export default function ProductGridSection({ title, subtitle, products, viewAllL
             price={product.price}
             originalPrice={product.originalPrice}
             image={product.image}
+            images={product.images}
             badge={product.badge}
           />
         ))}
