@@ -7,6 +7,9 @@ import Image from "next/image";
 import { X, ShoppingBag, Plus, Minus, Trash2, MessageCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 
+// Standard flat delivery charges per order in INR (adjust this value anytime)
+export const DELIVERY_CHARGES = 100;
+
 interface CartDrawerProps {
   isOpen?: boolean;
   onClose?: () => void;
@@ -18,6 +21,10 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
 
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : cartStore.isCartDrawerOpen;
   const onClose = controlledOnClose || cartStore.closeCart;
+
+  const subtotal = cartStore.getCartTotal();
+  const deliveryCharges = cartStore.items.length > 0 ? DELIVERY_CHARGES : 0;
+  const grandTotal = subtotal + deliveryCharges;
 
   useEffect(() => {
     setMounted(true);
@@ -51,7 +58,9 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
       message += `Link: ${origin}/product/${item.slug}\n\n`;
     });
 
-    message += `Cart Total: ₹${cartStore.getCartTotal().toLocaleString('en-IN')}\n\n`;
+    message += `Subtotal: ₹${subtotal.toLocaleString('en-IN')}\n`;
+    message += `Delivery Charges: ₹${deliveryCharges.toLocaleString('en-IN')}\n`;
+    message += `Total Amount: ₹${grandTotal.toLocaleString('en-IN')}\n\n`;
     message += "Please confirm availability and share the payment details. Thank you.";
 
     const encodedMessage = encodeURIComponent(message);
@@ -178,12 +187,25 @@ export default function CartDrawer({ isOpen: controlledIsOpen, onClose: controll
 
         {/* Footer */}
         {cartStore.items.length > 0 && (
-          <div className="p-4 sm:p-6 border-t border-border bg-surface shrink-0 space-y-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] mt-auto">
-            <div className="flex justify-between items-center">
-              <span className="font-serif text-base text-heading">Subtotal</span>
-              <span className="font-serif text-xl font-bold text-heading">₹{cartStore.getCartTotal().toLocaleString('en-IN')}</span>
+          <div className="p-4 sm:p-6 border-t border-border bg-surface shrink-0 space-y-3.5 pb-[max(1.25rem,env(safe-area-inset-bottom))] mt-auto">
+            <div className="space-y-2 border-b border-border/60 pb-3 text-sm">
+              <div className="flex justify-between items-center text-foreground/75">
+                <span>Subtotal</span>
+                <span className="font-medium text-foreground">₹{subtotal.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between items-center text-foreground/75">
+                <span>Delivery Charges</span>
+                <span className="font-medium text-foreground">₹{deliveryCharges.toLocaleString('en-IN')}</span>
+              </div>
             </div>
-            <p className="text-[11px] text-foreground/60 text-center">Shipping & taxes calculated at checkout</p>
+
+            <div className="flex justify-between items-center pt-0.5">
+              <span className="font-serif text-base text-heading font-semibold">Total</span>
+              <span className="font-serif text-xl font-bold text-heading">₹{grandTotal.toLocaleString('en-IN')}</span>
+            </div>
+
+            <p className="text-[11px] text-foreground/60 text-center">Standard delivery across India · Estimated 3–5 business days</p>
+
             <button 
               onClick={handleCheckout}
               className="w-full py-3.5 bg-[#25D366] text-white text-xs font-bold tracking-wider rounded-full hover:bg-[#128C7E] active:scale-[0.99] transition-all uppercase flex items-center justify-center gap-2 shadow-sm font-semibold cursor-pointer"
