@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Image as ImageIcon, Save, Upload, Plus, X, Link as LinkIcon } from "lucide-react";
 import toast from "@/lib/toast";
+import { compressImageToWebP, formatBytes } from "@/lib/image-compressor";
 
 type Hotspot = {
   id: string;
@@ -94,98 +95,64 @@ export default function StorefrontSettingsPage() {
     setLoading(false);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'campaign') => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'hero' | 'campaign') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const MAX_WIDTH = 1600;
-        const MAX_HEIGHT = 1600;
-        let width = img.width;
-        let height = img.height;
+    try {
+      const isHero = type === 'hero';
+      const result = await compressImageToWebP(file, {
+        maxWidth: isHero ? 1920 : 1600,
+        maxHeight: isHero ? 1920 : 1600,
+        quality: isHero ? 0.85 : 0.82
+      });
 
-        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-          if (width > height) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          } else {
-            width = Math.round((width * MAX_HEIGHT) / height);
-            height = MAX_HEIGHT;
-          }
-        }
+      if (type === 'hero') {
+        setHeroImageFile(result.file);
+        setHeroImagePreview(result.previewUrl);
+      } else {
+        setCampaignImageFile(result.file);
+        setCampaignImagePreview(result.previewUrl);
+      }
 
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                if (type === 'hero') {
-                  setHeroImageFile(blob);
-                  setHeroImagePreview(URL.createObjectURL(blob));
-                } else {
-                  setCampaignImageFile(blob);
-                  setCampaignImagePreview(URL.createObjectURL(blob));
-                }
-              }
-            },
-            "image/webp",
-            0.82
-          );
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+      toast.success(
+        `${isHero ? 'Hero' : 'Campaign'} image converted to WebP (${formatBytes(result.originalSize)} → ${formatBytes(result.compressedSize)}, -${result.savingsPercent}%)`,
+        "Image Optimized"
+      );
+    } catch (err: any) {
+      console.error(`Failed to compress ${type} image:`, err);
+      toast.error("Failed to process image: " + err.message);
+    }
   };
 
-  const handleInstagramImageChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleInstagramImageChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        // Crop to square for instagram with max 800px
-        const MAX_SIZE = 800;
-        const rawSize = Math.min(img.width, img.height);
-        const finalSize = Math.min(rawSize, MAX_SIZE);
+    try {
+      const result = await compressImageToWebP(file, {
+        maxWidth: 800,
+        maxHeight: 800,
+        squareCrop: true,
+        quality: 0.82
+      });
 
-        const canvas = document.createElement("canvas");
-        canvas.width = finalSize;
-        canvas.height = finalSize;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          const x = (img.width - rawSize) / 2;
-          const y = (img.height - rawSize) / 2;
-          ctx.drawImage(img, x, y, rawSize, rawSize, 0, 0, finalSize, finalSize);
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                const newFiles = [...instagramFiles];
-                newFiles[index] = blob;
-                setInstagramFiles(newFiles);
+      const newFiles = [...instagramFiles];
+      newFiles[index] = result.file;
+      setInstagramFiles(newFiles);
 
-                const newPreviews = [...instagramPreviews];
-                newPreviews[index] = URL.createObjectURL(blob);
-                setInstagramPreviews(newPreviews);
-              }
-            },
-            "image/webp",
-            0.82
-          );
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+      const newPreviews = [...instagramPreviews];
+      newPreviews[index] = result.previewUrl;
+      setInstagramPreviews(newPreviews);
+
+      toast.success(
+        `Instagram photo #${index + 1} cropped & converted to WebP (${formatBytes(result.originalSize)} → ${formatBytes(result.compressedSize)}, -${result.savingsPercent}%)`,
+        "Image Optimized"
+      );
+    } catch (err: any) {
+      console.error(`Failed to compress Instagram image #${index + 1}:`, err);
+      toast.error("Failed to process image: " + err.message);
+    }
   };
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {

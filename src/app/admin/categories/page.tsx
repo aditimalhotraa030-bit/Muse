@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Plus, Edit, Trash2, Search, Layers } from "lucide-react";
 import toast from "@/lib/toast";
 import AdminModal from "@/components/admin/AdminModal";
+import { compressImageToWebP, formatBytes } from "@/lib/image-compressor";
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -81,49 +82,22 @@ export default function AdminCategoriesPage() {
     setIsModalOpen(true);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const MAX_SIZE = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > MAX_SIZE || height > MAX_SIZE) {
-          if (width > height) {
-            height = Math.round((height * MAX_SIZE) / width);
-            width = MAX_SIZE;
-          } else {
-            width = Math.round((width * MAX_SIZE) / height);
-            height = MAX_SIZE;
-          }
-        }
-
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                setImageFile(blob);
-                setImagePreview(URL.createObjectURL(blob));
-              }
-            },
-            "image/webp",
-            0.82
-          );
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const result = await compressImageToWebP(file, { maxWidth: 1000, maxHeight: 1000, quality: 0.82 });
+      setImageFile(result.file);
+      setImagePreview(result.previewUrl);
+      toast.success(
+        `Banner converted to WebP (${formatBytes(result.originalSize)} → ${formatBytes(result.compressedSize)}, -${result.savingsPercent}%)`,
+        "Image Optimized"
+      );
+    } catch (err: any) {
+      console.error("Failed to compress category image:", err);
+      toast.error("Failed to process image: " + err.message);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

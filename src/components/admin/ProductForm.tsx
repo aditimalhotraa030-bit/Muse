@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, X, Upload, ArrowLeft, ArrowRight } from "lucide-react";
+import { Plus, X, Upload, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import toast from "@/lib/toast";
+import { compressImageToWebP, formatBytes } from "@/lib/image-compressor";
 
 interface ProductFormProps {
   initialData?: any;
@@ -14,7 +15,7 @@ interface ProductFormProps {
 interface ProductImageItem {
   id: string;
   url: string;
-  file?: Blob;
+  file?: File;
   isExisting?: boolean;
 }
 
@@ -26,6 +27,7 @@ export default function ProductForm({ initialData, productType = 'jewelry' }: Pr
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   const [formData, setFormData] = useState({
     product_name: "",
@@ -167,80 +169,46 @@ export default function ProductForm({ initialData, productType = 'jewelry' }: Pr
     });
   };
 
-  // Helper to convert images client-side to WebP for fast performance
-  const processImageToWebP = (file: File): Promise<{ blob: Blob; previewUrl: string }> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new window.Image();
-        img.onload = () => {
-          const MAX_WIDTH = 1400;
-          const MAX_HEIGHT = 1400;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-            if (width > height) {
-              height = Math.round((height * MAX_WIDTH) / width);
-              width = MAX_WIDTH;
-            } else {
-              width = Math.round((width * MAX_HEIGHT) / height);
-              height = MAX_HEIGHT;
-            }
-          }
-
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            canvas.toBlob(
-              (blob) => {
-                if (blob) {
-                  resolve({ blob, previewUrl: URL.createObjectURL(blob) });
-                } else {
-                  reject(new Error("Canvas toBlob failed"));
-                }
-              },
-              "image/webp",
-              0.84
-            );
-          } else {
-            reject(new Error("Canvas context not available"));
-          }
-        };
-        img.onerror = reject;
-        img.src = event.target?.result as string;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  // Multiple files selection handler
+  // Multiple files selection handler with client-side WebP conversion & compression
   const handleMultipleImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    setIsCompressing(true);
     const newItems: ProductImageItem[] = [];
+    let totalOriginalBytes = 0;
+    let totalCompressedBytes = 0;
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       try {
-        const { blob, previewUrl } = await processImageToWebP(file);
+        const result = await compressImageToWebP(file, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.82
+        });
+        totalOriginalBytes += result.originalSize;
+        totalCompressedBytes += result.compressedSize;
         newItems.push({
           id: `new-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 7)}`,
-          url: previewUrl,
-          file: blob,
+          url: result.previewUrl,
+          file: result.file,
           isExisting: false
         });
       } catch (err) {
-        console.error("Error processing image file:", err);
+        console.error("Error compressing image file:", err);
       }
     }
 
-    setGalleryItems(prev => [...prev, ...newItems]);
+    setIsCompressing(false);
+    if (newItems.length > 0) {
+      const savings = Math.max(0, Math.round(((totalOriginalBytes - totalCompressedBytes) / totalOriginalBytes) * 100));
+      toast.success(
+        `Optimized ${newItems.length} image(s) to WebP (${formatBytes(totalOriginalBytes)} → ${formatBytes(totalCompressedBytes)}, -${savings}%)`,
+        "Images Optimized"
+      );
+      setGalleryItems(prev => [...prev, ...newItems]);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -411,25 +379,47 @@ export default function ProductForm({ initialData, productType = 'jewelry' }: Pr
               />
               <button
                 type="button"
+                disabled={isCompressing}
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-wider rounded-md hover:bg-primary-hover transition-colors uppercase shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold tracking-wider rounded-md hover:bg-primary-hover transition-colors uppercase shadow-sm disabled:opacity-50"
               >
-                <Plus className="w-4 h-4" />
-                Upload Images
+                {isCompressing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Optimizing...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Upload Images
+                  </>
+                )}
               </button>
             </div>
           </div>
 
           {galleryItems.length === 0 ? (
             <div 
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !isCompressing && fileInputRef.current?.click()}
               className="border-2 border-dashed border-border rounded-xl p-8 sm:p-12 text-center cursor-pointer hover:border-primary/50 transition-colors bg-muted/20 group"
             >
-              <Upload className="w-10 h-10 text-foreground/40 group-hover:text-primary mx-auto mb-3 transition-colors" />
-              <p className="text-sm font-medium text-heading">Click to upload 1 or more product photos</p>
-              <p className="text-xs text-foreground/50 mt-1 max-w-md mx-auto">
-                You can select multiple photos at once. Photos are automatically converted to optimized WebP format for fast customer loading.
-              </p>
+              {isCompressing ? (
+                <>
+                  <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-3" />
+                  <p className="text-sm font-medium text-heading">Converting & compressing images to WebP...</p>
+                  <p className="text-xs text-foreground/50 mt-1 max-w-md mx-auto">
+                    Please wait while your photos are optimized for maximum site speed.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-10 h-10 text-foreground/40 group-hover:text-primary mx-auto mb-3 transition-colors" />
+                  <p className="text-sm font-medium text-heading">Click to upload 1 or more product photos</p>
+                  <p className="text-xs text-foreground/50 mt-1 max-w-md mx-auto">
+                    You can select multiple photos at once. Photos are automatically converted to optimized WebP format for fast customer loading.
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
