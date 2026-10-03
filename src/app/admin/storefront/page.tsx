@@ -202,82 +202,86 @@ export default function StorefrontSettingsPage() {
     e.preventDefault();
     setIsSaving(true);
     
-    let updatedHeroUrl = settings.hero_image;
-    let updatedCampaignUrl = settings.campaign_image;
-    let updatedInstagramFeed = [...instagramFeed];
+    try {
+      let updatedHeroUrl = settings.hero_image;
+      let updatedCampaignUrl = settings.campaign_image;
+      let updatedInstagramFeed = [...instagramFeed];
 
-    // Upload Hero Image
-    if (heroImageFile) {
-      const fileName = `${Date.now()}-hero.webp`;
-      const { error: uploadError } = await supabase.storage
-        .from('product-images-muse')
-        .upload(fileName, heroImageFile, { contentType: 'image/webp' });
-        
-      if (uploadError) {
-        toast.error("Error uploading hero image: " + uploadError.message);
-        setIsSaving(false);
-        return;
-      }
-      const { data } = supabase.storage.from('product-images-muse').getPublicUrl(fileName);
-      updatedHeroUrl = data.publicUrl;
-    }
-
-    // Upload Campaign Image
-    if (campaignImageFile) {
-      const fileName = `${Date.now()}-campaign.webp`;
-      const { error: uploadError } = await supabase.storage
-        .from('product-images-muse')
-        .upload(fileName, campaignImageFile, { contentType: 'image/webp' });
-        
-      if (uploadError) {
-        toast.error("Error uploading campaign image: " + uploadError.message);
-        setIsSaving(false);
-        return;
-      }
-      const { data } = supabase.storage.from('product-images-muse').getPublicUrl(fileName);
-      updatedCampaignUrl = data.publicUrl;
-    }
-
-    // Upload Instagram Images
-    for (let i = 0; i < 5; i++) {
-      if (instagramFiles[i]) {
-        const fileName = `${Date.now()}-insta-${i}.webp`;
+      // Upload Hero Image
+      if (heroImageFile) {
+        const fileName = `${Date.now()}-hero.webp`;
         const { error: uploadError } = await supabase.storage
           .from('product-images-muse')
-          .upload(fileName, instagramFiles[i]!, { contentType: 'image/webp' });
+          .upload(fileName, heroImageFile, { contentType: 'image/webp' });
           
         if (uploadError) {
-          toast.error(`Error uploading Instagram image ${i + 1}: ` + uploadError.message);
-        } else {
-          const { data } = supabase.storage.from('product-images-muse').getPublicUrl(fileName);
-          updatedInstagramFeed[i] = { ...updatedInstagramFeed[i], image_url: data.publicUrl };
+          toast.error("Error uploading hero image: " + uploadError.message);
+          return;
+        }
+        const { data } = supabase.storage.from('product-images-muse').getPublicUrl(fileName);
+        updatedHeroUrl = data.publicUrl;
+      }
+
+      // Upload Campaign Image
+      if (campaignImageFile) {
+        const fileName = `${Date.now()}-campaign.webp`;
+        const { error: uploadError } = await supabase.storage
+          .from('product-images-muse')
+          .upload(fileName, campaignImageFile, { contentType: 'image/webp' });
+          
+        if (uploadError) {
+          toast.error("Error uploading campaign image: " + uploadError.message);
+          return;
+        }
+        const { data } = supabase.storage.from('product-images-muse').getPublicUrl(fileName);
+        updatedCampaignUrl = data.publicUrl;
+      }
+
+      // Upload Instagram Images
+      for (let i = 0; i < 5; i++) {
+        if (instagramFiles[i]) {
+          const fileName = `${Date.now()}-insta-${i}.webp`;
+          const { error: uploadError } = await supabase.storage
+            .from('product-images-muse')
+            .upload(fileName, instagramFiles[i]!, { contentType: 'image/webp' });
+            
+          if (uploadError) {
+            toast.error(`Error uploading Instagram image ${i + 1}: ` + uploadError.message);
+          } else {
+            const { data } = supabase.storage.from('product-images-muse').getPublicUrl(fileName);
+            updatedInstagramFeed[i] = { ...updatedInstagramFeed[i], image_url: data.publicUrl };
+          }
         }
       }
-    }
 
-    // Save to database
-    const { error } = await supabase.from('storefront_settings').upsert([
-      { key: 'hero_image', value: updatedHeroUrl },
-      { key: 'campaign_image', value: updatedCampaignUrl },
-      { key: 'shop_the_look_data', value: JSON.stringify(hotspots) },
-      { key: 'instagram_feed_data', value: JSON.stringify(updatedInstagramFeed) }
-    ]);
-    
-    if (error) {
-      toast.error("Failed to save settings: " + error.message);
-    } else {
-      setSettings({ 
-        hero_image: updatedHeroUrl, 
-        campaign_image: updatedCampaignUrl,
-        shop_the_look_data: hotspots,
-        instagram_feed_data: updatedInstagramFeed
-      });
-      setHeroImageFile(null);
-      setCampaignImageFile(null);
-      setInstagramFiles(Array(5).fill(null));
-      toast.success("Storefront settings saved successfully!");
+      // Save to database
+      const { error } = await supabase.from('storefront_settings').upsert([
+        { key: 'hero_image', value: updatedHeroUrl },
+        { key: 'campaign_image', value: updatedCampaignUrl },
+        { key: 'shop_the_look_data', value: JSON.stringify(hotspots) },
+        { key: 'instagram_feed_data', value: JSON.stringify(updatedInstagramFeed) }
+      ]);
+      
+      if (error) {
+        toast.error("Failed to save settings: " + error.message);
+      } else {
+        setSettings({ 
+          hero_image: updatedHeroUrl, 
+          campaign_image: updatedCampaignUrl,
+          shop_the_look_data: hotspots,
+          instagram_feed_data: updatedInstagramFeed
+        });
+        setHeroImageFile(null);
+        setCampaignImageFile(null);
+        setInstagramFiles(Array(5).fill(null));
+        toast.success("Storefront settings saved successfully!");
+      }
+    } catch (err: any) {
+      console.error("Error in handleSubmit:", err);
+      toast.error(err?.message || "An unexpected error occurred while saving.");
+    } finally {
+      setIsSaving(false);
     }
-    setIsSaving(false);
   };
 
   if (loading) {
